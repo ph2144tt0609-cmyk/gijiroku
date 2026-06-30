@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f4f6f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161b" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="議事録">
+<title>議事録</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --line:#e6e8ee; --text:#161922;
+  --sub:#5b626f; --hint:#9aa0ad; --accent:#2f6db0; --accent-soft:#e6eef8;
+  --shadow:0 1px 2px rgba(20,24,33,.04), 0 4px 16px rgba(20,24,33,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#14161b; --card:#1d2026; --line:#2b2f39; --text:#eceef2; --sub:#9aa0ad; --hint:#6b7280;
+    --accent:#5aa0e0; --accent-soft:#16314c;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.35); }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Noto Sans JP",-apple-system,"Segoe UI",Roboto,sans-serif;
+  line-height:1.7;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:780px;margin:0 auto;padding:22px 16px 80px;}
+/* 合言葉ゲート */
+#gate{min-height:74vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;}
+#gate .glogo{width:52px;height:52px;border-radius:16px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
+#gate .glogo svg{width:28px;height:28px;fill:#fff;}
+#gate h1{font-size:21px;font-weight:700;margin:0;}
+#gate p{color:var(--sub);font-size:14px;margin:0;}
+#gate input{width:240px;height:50px;font-size:20px;letter-spacing:.4em;padding:0 14px;border:1px solid var(--line);
+  border-radius:13px;background:var(--card);color:var(--text);text-align:center;box-shadow:var(--shadow);outline:none;}
+#gate input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+#gate button{height:48px;padding:0 30px;font-size:16px;font-weight:700;border:none;border-radius:13px;
+  background:var(--accent);color:#fff;cursor:pointer;box-shadow:var(--shadow);}
+#gate button:active{transform:scale(.97)}
+#err{color:#c0392b;font-size:13px;height:16px;}
+/* ヘッダー */
+header{display:flex;align-items:center;gap:10px;margin:2px 0 6px;}
+header .brand{width:34px;height:34px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:var(--shadow);}
+header .brand svg{width:19px;height:19px;fill:#fff;}
+header h1{font-size:22px;font-weight:700;margin:0;}
+header .gen{font-size:12px;color:var(--hint);margin-left:2px;}
+.logout{margin-left:auto;font-size:12px;color:var(--hint);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:7px 13px;cursor:pointer;}
+.logout:active{transform:scale(.97)}
+/* 月見出し */
+.cat{font-size:13px;font-weight:700;color:var(--sub);margin:22px 0 10px;letter-spacing:.04em;
+  display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;}
+.cat::after{content:"";flex:1;height:1px;background:var(--line);}
+/* 議事録カード（アコーディオン） */
+.rec{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px 0;box-shadow:var(--shadow);overflow:hidden;}
+.rec>summary{list-style:none;cursor:pointer;padding:15px 16px;display:flex;flex-direction:column;gap:3px;}
+.rec>summary::-webkit-details-marker{display:none}
+.rec>summary::after{content:"›";position:absolute;right:18px;font-size:22px;color:var(--hint);transform:rotate(90deg);transition:transform .2s;}
+.rec[open]>summary::after{transform:rotate(-90deg);}
+.rec>summary{position:relative;}
+.rec .rt{font-weight:700;font-size:16px;padding-right:24px;}
+.rec .rd{font-size:12.5px;color:var(--sub);}
+.rec .body{padding:2px 18px 18px;border-top:1px solid var(--line);margin-top:2px;}
+/* 本文（Markdown描画） */
+.body h2{font-size:15.5px;font-weight:700;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line);}
+.body h3{font-size:14.5px;font-weight:700;margin:14px 0 6px;color:var(--accent);}
+.body h4{font-size:14px;font-weight:700;margin:12px 0 5px;}
+.body p{margin:8px 0;}
+.body ul,.body ol{margin:8px 0;padding-left:22px;}
+.body li{margin:4px 0;}
+.body li.done{color:var(--hint);}
+.body code{background:var(--accent-soft);padding:1px 6px;border-radius:6px;font-size:13px;}
+.body blockquote{margin:10px 0;padding:9px 14px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:8px;color:var(--sub);font-size:13.5px;}
+.body hr{border:none;border-top:1px solid var(--line);margin:14px 0;}
+.body table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px;}
+.body th,.body td{border:1px solid var(--line);padding:6px 10px;text-align:left;}
+.body th{background:var(--accent-soft);font-weight:700;}
+.empty{text-align:center;padding:50px 16px;color:var(--sub);}
+.foot{margin-top:36px;font-size:11px;color:var(--hint);text-align:center;}
+@media (max-width:560px){ header h1{font-size:20px;} .rec .rt{font-size:15px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="gate">
+    <div class="glogo"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></div>
+    <h1>議事録</h1>
+    <p>合言葉を入力してください</p>
+    <input id="pw" type="password" autocomplete="off" inputmode="numeric" enterkeyhint="go" autofocus placeholder="••••">
+    <button id="go">ひらく</button>
+    <div id="err" role="alert" aria-live="assertive"></div>
+  </div>
+  <div id="app" style="display:none"></div>
+</div>
+<script>
+const ENC = {"salt": "wEB7RG3UBiXm4fHaGHFESQ==", "iv": "AVzBbKqH6UGo0OlW", "ct": "cVJpzh6S2zfSYaTLRzwb/arg+/aPHgIY3AJbsWwuRkIzSeNFoFmmbtq1MKwbORa6F3u/cZoFsBtD0VU3EgYGgloL2wUDtu4JLlLu/YXG4fb+xDAqR87UvEaHcV+mRJBvRbfCST0sl1rAio+aajEeYUkmWTlFGV5eEUAvqUG5aUamk6nMksIKb2h1BI/QEWSdYUxyeQle44jT7EytekM/+wf8NtQZq6+6VD4CqambUuuD3aB/D9o9ILNc8uu+MARHuXmRsHqGRKXXLUoN7iO3gOTSEujyapvq97vvnuu+QH7rK7SDXRS6j+3YDuHbDV4wy5ZVH3vPR1lJz9jiDz7/wr5eobLOOahtdDkwCGMRF6cu6qWH8dc+CLMds4MZuaq+BLteFybrCFan6xvOahSXIzaibuCiBi1PguKKJbPQre59D3+JdDvQMfpvPKX3cyuTbGhzWCZM2Vto1ga1Nh+WGzdJUcTG5S9T4WlQRCFXRkNzGNWmiMd3gmMJYj5oxm3fskGxz5WC1S1Flt3ktI+OsTHB5h0WYP4zueTxUv/E/wQtASBrTj0mErKJWlqKyOLF6ck+H8GIM35p20Q6b8ejO6SQzdXQBI1MjcIDzxNSb/xiP/o6wDDuCcetzfN9NG356vtiSIMLy6lxPAPaAS81A7F72A2bVPf2+XcRx/qpdhs3X74Bh6AcRWS2CTUrZUR03cmZdFbzHIhPunAMweYnPGk18wllSnQFitPcdWxRr69OHfgtKoNQI4wB31hQrJuHP3V152YKy2BdjisqsIOLAWnNpmKETmwR76FF+XI0OOzQDlg3ted7VtauW2uBAkBwe61TsCOWWshtvvpmdRqPRtvDx1mHv44C2qo8waoKPWACcv9DFqOBqgGIBLN+pNXYeffxPa1euVJg8CyP7XMccx4DRWM/y90EYfH7TKQIZx4U93kyfRlCzUEk4UIt4TFqAEEtsn3kW0uczOCAYDjL6CE1JWE3D78fchArkIKRlomdHyDyBKzE41dDvjWWbWDvTgSR+/Ay66Miqqg5JQQxfcQz6aB7l68QjXMn5vZt0Fx8gVzqtvtjiiTGdg/PNHttKRY8RRiCJdwalvqkvscrrBA/XR53St0dgiXBU+k0aB/vNtOZp/eEJHOT496yGbzfyXiEF9lGCD1r/+s9rhwAevmTd6Czihh5KPoMHxjtscx0pTQCCbKSS844dfHn16U9Q/q7VNrmnNeMQOjLuy2svLyHKBS0C2OVTxCdElB0dS3tH8bljvyqDxiPEI0U+fj3B3xx+yH1l4YpuCpFInvfLkSbx85TRezhTMprRC5zlMe479ERwsZMzZc5YqBz9i2a87hkpx4ZdZ6UEJrAThvdw3mS0HTe9/kve1T7tBSyopYN3gjmemt8/waG+/PhpXGBvzLoVjEhdPhlohBcVITp2a2xGx4eoxSHTj9p2phRbi/Lyan2eIUebavWPw/uneOCHQEnQjOiRQ/tGWTVCS3GIki5dkg/mxjEEJObz7Ov43xa0cn28PPU5GXP9BnzUh25IGgaCjoihRzeRkMpoTTJT9faBvuvZYGx96uUZA8fV2gIKVeapqrZQEFZVkghezFcsfgX6xYJ+i/ODq5RUxCacXBL5Eg3mA==", "iter": 200000};
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const b2u = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+async function decrypt(pass){
+  const baseKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    {name:"PBKDF2", salt:b2u(ENC.salt), iterations:ENC.iter, hash:"SHA-256"},
+    baseKey, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:b2u(ENC.iv)}, key, b2u(ENC.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+function inline(s){
+  s = esc(s);
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  return s;
+}
+function mdToHtml(md){
+  const lines = String(md).replace(/\r\n/g, "\n").split("\n");
+  const out = []; let i = 0;
+  const isBreak = ln => /^\s*$/.test(ln) || /^(#{1,4}\s|>\s?|\s*([-*]|\d+\.)\s|\|)/.test(ln) || /^---+$/.test(ln.trim());
+  while(i < lines.length){
+    let ln = lines[i];
+    if(/^\s*$/.test(ln)){ i++; continue; }
+    if(/^---+$/.test(ln.trim())){ out.push("<hr>"); i++; continue; }
+    let h = ln.match(/^(#{1,4})\s+(.*)/);
+    if(h){ const lv = h[1].length; out.push(`<h${lv}>${inline(h[2])}</h${lv}>`); i++; continue; }
+    if(/^>\s?/.test(ln)){
+      const buf = [];
+      while(i < lines.length && /^>\s?/.test(lines[i])){ buf.push(inline(lines[i].replace(/^>\s?/, ""))); i++; }
+      out.push("<blockquote>" + buf.join("<br>") + "</blockquote>"); continue;
+    }
+    if(/^\|.*\|/.test(ln) && i+1 < lines.length && /^\|[\s:|\-]+\|/.test(lines[i+1])){
+      const head = ln.split("|").slice(1,-1).map(c => `<th>${inline(c.trim())}</th>`).join("");
+      i += 2; let rows = "";
+      while(i < lines.length && /^\|.*\|/.test(lines[i])){
+        rows += "<tr>" + lines[i].split("|").slice(1,-1).map(c => `<td>${inline(c.trim())}</td>`).join("") + "</tr>"; i++;
+      }
+      out.push(`<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`); continue;
+    }
+    if(/^\s*([-*]|\d+\.)\s+/.test(ln)){
+      const ordered = /^\s*\d+\.\s+/.test(ln);
+      const tag = ordered ? "ol" : "ul";
+      let items = "";
+      while(i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i])){
+        let item = lines[i].replace(/^\s*([-*]|\d+\.)\s+/, "");
+        let cls = "";
+        const cb = item.match(/^\[([ xX])\]\s+(.*)/);
+        if(cb){ const done = cb[1].toLowerCase() === "x"; item = (done ? "☑ " : "☐ ") + cb[2]; cls = done ? ' class="done"' : ""; }
+        items += `<li${cls}>${inline(item)}</li>`; i++;
+      }
+      out.push(`<${tag}>${items}</${tag}>`); continue;
+    }
+    const buf = [];
+    while(i < lines.length && !isBreak(lines[i])){ buf.push(inline(lines[i])); i++; }
+    out.push("<p>" + buf.join("<br>") + "</p>");
+  }
+  return out.join("\n");
+}
+function fmtDate(d){
+  if(!/^\d{8}$/.test(d)) return {ymKey:"____", ym:"日付なし", full:""};
+  const y = +d.slice(0,4), mo = +d.slice(4,6), da = +d.slice(6,8);
+  const w = "日月火水木金土"[new Date(y, mo-1, da).getDay()];
+  const p = n => String(n).padStart(2,"0");
+  return {ymKey:d.slice(0,6), ym:`${y}年${mo}月`, full:`${y}/${p(mo)}/${p(da)}（${w}）`};
+}
+
+let DATA = null;
+function render(){
+  const items = DATA.items;
+  let h = '<header><span class="brand"><svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 0 1 12 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1zm2 0h8V8a4 4 0 0 0-8 0v2z"/></svg></span>'
+        + '<h1>議事録</h1><span class="gen">更新 ' + esc(DATA.generated) + '</span>'
+        + '<button class="logout" id="logout">ロック</button></header>';
+  if(!items.length){
+    h += '<div class="empty">まだ議事録がありません。</div>';
+  } else {
+    let curYm = null;
+    items.forEach((it, idx) => {
+      const fd = fmtDate(it.date);
+      if(fd.ymKey !== curYm){ curYm = fd.ymKey; h += '<div class="cat">' + esc(fd.ym) + '</div>'; }
+      const open = idx === 0 ? " open" : "";
+      h += '<details class="rec"' + open + '><summary><span class="rt">' + esc(it.title) + '</span>'
+         + '<span class="rd">' + esc(fd.full) + '</span></summary>'
+         + '<div class="body">' + mdToHtml(it.md) + '</div></details>';
+    });
+  }
+  h += '<div class="foot">合言葉で暗号化して公開 / スマホからも見られます</div>';
+  const app = document.getElementById("app");
+  app.innerHTML = h;
+  document.getElementById("gate").style.display = "none";
+  app.style.display = "block";
+  document.getElementById("logout").onclick = () => { sessionStorage.removeItem("minpass"); location.reload(); };
+}
+
+async function tryPass(pass, fromStore){
+  try{
+    DATA = await decrypt(pass);
+    sessionStorage.setItem("minpass", pass);
+    render();
+  }catch(e){
+    if(!fromStore){ document.getElementById("err").textContent = "合言葉が違います"; }
+    sessionStorage.removeItem("minpass");
+  }
+}
+document.getElementById("go").onclick = () => tryPass(document.getElementById("pw").value, false);
+document.getElementById("pw").addEventListener("keydown", e => { if(e.key === "Enter") tryPass(e.target.value, false); });
+const saved = sessionStorage.getItem("minpass");
+if(saved) tryPass(saved, true);
+</script>
+</body>
+</html>
